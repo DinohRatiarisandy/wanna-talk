@@ -4,71 +4,104 @@ import { ComponentPropsWithoutRef } from "react";
 import { Image, Send } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import MessageCard from "./MessageCard";
+import chatImg from "../../assets/users-profiles/my-profile.jpeg";
+import profile1 from "../../assets/users-profiles/profile-1.jpg";
+import profile2 from "../../assets/users-profiles/profile-2.jpg";
+import profile3 from "../../assets/users-profiles/profile-3.jpg";
 
 const MESSAGES = [
    {
-      msgID: "12en",
+      msgID: "12en13",
       sender: "Lety",
-      text: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
+      content:
+         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
       sendAt: "today: 12:06",
    },
    {
-      msgID: "13en",
+      msgID: "13ensa",
       sender: "Dinoh",
-      text: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
+      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
       sendAt: "today: 12:09",
    },
    {
-      msgID: "12en",
+      msgID: "12enars",
       sender: "Lety",
-      text: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
+      content:
+         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
       sendAt: "today: 12:06",
    },
    {
-      msgID: "13en",
+      msgID: "13enzx",
       sender: "Dinoh",
-      text: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
+      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
       sendAt: "today: 12:09",
    },
    {
-      msgID: "12en",
+      msgID: "12enhn",
       sender: "Lety",
-      text: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
+      content:
+         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
       sendAt: "today: 12:06",
    },
    {
-      msgID: "13en",
+      msgID: "13en213r",
       sender: "Dinoh",
-      text: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
+      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
       sendAt: "today: 12:09",
    },
    {
-      msgID: "12en",
+      msgID: "12en567t",
       sender: "Lety",
-      text: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
+      content:
+         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
       sendAt: "today: 12:06",
    },
    {
-      msgID: "13en",
+      msgID: "13en12s",
       sender: "Dinoh",
-      text: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
+      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
       sendAt: "today: 12:09",
    },
    {
-      msgID: "12en",
+      msgID: "12enllu[",
       sender: "Lety",
-      text: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
+      content:
+         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
       sendAt: "today: 12:06",
    },
    {
-      msgID: "13en",
+      msgID: "13en][",
       sender: "Dinoh",
-      text: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
+      isContentImg: true,
+      content: chatImg,
+      sendAt: "today: 12:09",
+   },
+   {
+      msgID: "13e.n",
+      sender: "Lety",
+      isContentImg: true,
+      content: profile1,
+      sendAt: "today: 12:09",
+   },
+   {
+      msgID: "13en/.",
+      sender: "Lety",
+      isContentImg: true,
+      content: profile2,
+      sendAt: "today: 12:09",
+   },
+   {
+      msgID: "13easn/.",
+      sender: "Dinoh",
+      isContentImg: true,
+      content: profile3,
       sendAt: "today: 12:09",
    },
 ];
 
-export default function ChatDetails(props: ComponentPropsWithoutRef<"div">) {
+type ChatDetailsProps = ComponentPropsWithoutRef<"div">;
+
+export default function ChatDetails(props: ChatDetailsProps) {
    return (
       <div className={props.className}>
          {/**
@@ -93,8 +126,8 @@ export default function ChatDetails(props: ComponentPropsWithoutRef<"div">) {
                return (
                   <MessageCard
                      key={msg.msgID}
-                     {...msg}
                      variant={msg.sender === "Dinoh" ? "own" : "friend"}
+                     {...msg}
                   />
                );
             })}
