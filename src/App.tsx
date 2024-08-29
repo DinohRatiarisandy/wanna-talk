@@ -10,7 +10,7 @@ function App() {
          <div className="flex">
             <ChatList className="flex h-[100vh] flex-[1] flex-col gap-2 border-r" />
             <ChatDetails className="flex h-[100vh] flex-[2.5] flex-col lg:border-r" />
-            <ChatMedia className="hidden flex-[1] lg:block" />
+            <ChatMedia className="hidden h-[100vh] flex-[1] flex-col lg:flex" />
             <ToggleTheme className="absolute left-4 top-[92vh]" />
          </div>
       </ThemeProvider>
