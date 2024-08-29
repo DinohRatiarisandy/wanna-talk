@@ -6,7 +6,8 @@ type MessageVariant = "own" | "friend";
 type MessageCardProps = ComponentPropsWithoutRef<"div"> & {
    msgID: string;
    sender: string;
-   text: string;
+   content: string;
+   isContentImg?: boolean;
    sendAt: string;
    variant?: MessageVariant;
 };
@@ -25,11 +26,15 @@ export default function MessageCard({
                "rounded bg-secondary p-1 text-secondary-foreground":
                   variant === "friend",
             },
-            "sm:max-w-full lg:max-w-[85%]",
+            `${props.isContentImg ? "w-[50%]" : ""} sm:max-w-full lg:max-w-[85%]`,
             className,
          )}
       >
-         <p>{props.text}</p>
+         {props.isContentImg ? (
+            <img src={props.content} />
+         ) : (
+            <p>{props.content}</p>
+         )}
       </div>
    );
 }
