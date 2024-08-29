@@ -98,7 +98,9 @@ const CHAT_LIST = [
       chatLastMsg: "Salut ! ❤️",
    },
 ];
-export default function ChatList(props: ComponentPropsWithoutRef<"div">) {
+type ChatListProps = ComponentPropsWithoutRef<"div">;
+
+export default function ChatList(props: ChatListProps) {
    return (
       <div className={props.className}>
          {/**
