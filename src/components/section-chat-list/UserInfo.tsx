@@ -15,8 +15,8 @@ export default function UserInfo(props: UserInfoProps) {
             <AvatarFallback>RDL</AvatarFallback>
          </Avatar>
          <div>
-            <h1 className="text-sm font-semibold">{props.userName}</h1>
-            <p className="text-xs">{props.children}</p>
+            <h1>{props.userName}</h1>
+            {props.children}
          </div>
       </div>
    );

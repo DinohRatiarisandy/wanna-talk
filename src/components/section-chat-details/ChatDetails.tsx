@@ -8,6 +8,12 @@ import chatImg from "../../assets/users-profiles/my-profile.jpeg";
 import profile1 from "../../assets/users-profiles/profile-1.jpg";
 import profile2 from "../../assets/users-profiles/profile-2.jpg";
 import profile3 from "../../assets/users-profiles/profile-3.jpg";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const MESSAGES = [
    {
@@ -105,14 +111,15 @@ export default function ChatDetails(props: ChatDetailsProps) {
    return (
       <div className={props.className}>
          {/**
+          *
           * Header: Show with who the user chat
           *
           */}
-         <header className="flex w-full border-b">
+         <header className="flex border-b border-accent text-xl">
             <UserInfo
                userProfile={userProfile}
                userName="Prisca L."
-               className="flex items-center gap-2"
+               className="flex w-full gap-2"
             />
          </header>
 
@@ -138,10 +145,30 @@ export default function ChatDetails(props: ChatDetailsProps) {
           * Input for sending message
           *
           */}
-         <form className="flex items-end gap-2 border-t p-2">
-            <Image className="cursor-pointer" />
+         <form className="flex items-end gap-2 p-2">
+            <TooltipProvider>
+               <Tooltip>
+                  <TooltipTrigger>
+                     <Image className="cursor-pointer transition-all hover:text-primary dark:hover:text-primary" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Upload image</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+
             <Textarea placeholder="Tap your message..." />
-            <Send className="cursor-pointer" />
+
+            <TooltipProvider>
+               <Tooltip>
+                  <TooltipTrigger>
+                     <Send className="cursor-pointer transition-all hover:text-primary dark:hover:text-primary" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>Send</p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
          </form>
       </div>
    );

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { Download } from "lucide-react";
 import { ComponentPropsWithoutRef } from "react";
 
 type MessageVariant = "own" | "friend";
@@ -26,12 +27,18 @@ export default function MessageCard({
                "rounded bg-secondary p-1 text-secondary-foreground":
                   variant === "friend",
             },
-            `${props.isContentImg ? "w-[50%]" : ""} sm:max-w-full lg:max-w-[85%]`,
+            `${props.isContentImg ? "w-[50%] bg-transparent" : ""} sm:max-w-full lg:max-w-[85%]`,
             className,
          )}
       >
          {props.isContentImg ? (
-            <img src={props.content} />
+            <div className="relative">
+               <img src={props.content} className="rounded-xs" />
+               <Download
+                  size={18}
+                  className={`absolute ${variant === "own" ? "-left-8" : "-right-8"} bottom-[50%] cursor-pointer rounded-xl text-accent transition-all hover:text-accent-foreground`}
+               />
+            </div>
          ) : (
             <p>{props.content}</p>
          )}

@@ -2,18 +2,19 @@ import { ComponentPropsWithoutRef } from "react";
 import profile1 from "../../assets/users-profiles/profile-1.jpg";
 import profile2 from "../../assets/users-profiles/profile-2.jpg";
 import profile3 from "../../assets/users-profiles/profile-3.jpg";
+import { Download } from "lucide-react";
 
 const SHARED_IMAGES = [
    {
-      uid: "asrtoein",
+      uid: "asrtoein784",
       imgUrl: profile1,
    },
    {
-      uid: "asrtein",
+      uid: "asrteitdk4n",
       imgUrl: profile2,
    },
    {
-      uid: "astoein",
+      uid: "astar09-oein",
       imgUrl: profile3,
    },
    {
@@ -59,17 +60,23 @@ type ChatMediaProps = ComponentPropsWithoutRef<"div">;
 export default function ChatMedia({ className }: ChatMediaProps) {
    return (
       <div className={className}>
-         <header className="w-full border-b p-3 text-center text-lg font-semibold">
+         <header className="w-full p-3 text-center text-lg font-semibold">
             Shared Media
          </header>
          <main className="flex flex-wrap justify-center gap-2 overflow-scroll p-2">
             {SHARED_IMAGES.map(function (img) {
                return (
-                  <img
-                     src={img.imgUrl}
-                     key={img.uid}
-                     className="h-32 w-32 rounded object-cover"
-                  />
+                  <div key={img.uid} className="group relative">
+                     <img
+                        src={img.imgUrl}
+                        key={img.uid}
+                        className="group-hover:contrast-90 h-32 w-32 rounded object-cover transition duration-300 group-hover:brightness-[60%]"
+                     />
+                     <Download
+                        className="z-100 absolute right-[50%] top-[50%] hidden -translate-y-[50%] translate-x-[50%] cursor-pointer text-secondary transition duration-100 hover:text-gray-200/50 group-hover:block dark:text-white dark:hover:text-gray-400"
+                        size={42}
+                     />
+                  </div>
                );
             })}
          </main>
