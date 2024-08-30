@@ -1,0 +1,18 @@
+import { create } from "zustand";
+import { User } from "firebase/auth";
+
+type AuthState = {
+   user: User | null;
+   isLoading: boolean;
+   setUser: (user: User | null) => void;
+   setLoading: (loading: boolean) => void;
+};
+
+export const useAuthStore = create<AuthState>(function (set) {
+   return {
+      user: null,
+      isLoading: true,
+      setUser: (user) => set({ user, isLoading: false }),
+      setLoading: (loading) => set({ isLoading: loading }),
+   };
+});
