@@ -1,8 +1,11 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import GmailIcon from "../logos/GmailIcon";
-import { auth, provider } from "../utils/firebase";
+import { auth, provider } from "../../firebase";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Login() {
+   const setUser = useAuthStore((state) => state.setUser);
+
    async function handleGoogleLogin(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
       try {
@@ -16,6 +19,7 @@ export default function Login() {
                const user = result.user;
                // IdP data available using getAdditionalUserInfo(result)
                // ...
+               setUser(user);
             })
             .catch((error) => {
                // Handle Errors here.

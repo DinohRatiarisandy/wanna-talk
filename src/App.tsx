@@ -1,14 +1,11 @@
-import { ThemeProvider } from "@/components/utils/theme-provider";
 import AppContent from "./components/AppContent";
-import { AuthProvider } from "./components/context/AuthProvider";
+import { AuthProvider } from "./store/AuthProvider";
 
 function App() {
    return (
-      <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-         <AuthProvider>
-            <AppContent />
-         </AuthProvider>
-      </ThemeProvider>
+      <AuthProvider>
+         <AppContent />
+      </AuthProvider>
    );
 }
 

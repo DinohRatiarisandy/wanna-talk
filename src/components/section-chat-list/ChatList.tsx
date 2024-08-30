@@ -3,20 +3,20 @@ import { Input } from "../ui/input";
 import { Ellipsis, LogOut, Search, UserRoundPen } from "lucide-react";
 import ChatCard from "./ChatCard";
 import { ComponentPropsWithoutRef } from "react";
-import { ToggleTheme } from "../utils/ToggleTheme";
+import { ToggleTheme } from "../ui/ToggleTheme";
 import {
    DropdownMenuItem,
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { useTheme } from "../utils/theme-provider";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "../ui/tooltip";
+import { useThemeStore } from "@/store/useThemeStore";
 
 const CHAT_LIST = [
    {
@@ -115,11 +115,8 @@ const CHAT_LIST = [
 type ChatListProps = ComponentPropsWithoutRef<"div">;
 
 export default function ChatList(props: ChatListProps) {
-   const { theme, setTheme } = useTheme();
+   const { theme, toggleTheme } = useThemeStore();
 
-   function toggleTheme() {
-      setTheme(theme === "dark" ? "light" : "dark");
-   }
    return (
       <div className={props.className}>
          {/**
