@@ -1,7 +1,7 @@
-import { UserInfos } from "../models/types";
+import { UserFirebase } from "../models/types";
 import UserInfo from "./UserInfo";
 
-type ChatCardProps = UserInfos & {
+type ChatCardProps = UserFirebase & {
    lastMessage: string;
 };
 

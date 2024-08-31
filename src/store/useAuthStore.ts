@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { UserInfos } from "@/components/models/types";
+import { UserFirebase } from "@/components/models/types";
 
 type AuthState = {
-   user: UserInfos | undefined | null;
+   user: UserFirebase | undefined | null;
    isLoading: boolean;
-   setUser: (user: UserInfos | undefined | null) => void;
+   setUser: (user: UserFirebase | undefined | null) => void;
    setLoading: (loading: boolean) => void;
 };
 

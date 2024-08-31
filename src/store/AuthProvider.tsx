@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { auth } from "@/firebase";
-import { UserInfos } from "@/components/models/types";
+import { UserFirebase } from "@/components/models/types";
 
 type AuthProviderProps = {
    children: ReactNode;
@@ -14,7 +14,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
    useEffect(() => {
       const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
-         const currentUserData: UserInfos = {
+         const currentUserData: UserFirebase = {
             userID: firebaseUser?.uid,
             userName: firebaseUser?.displayName,
             userEmail: firebaseUser?.email,

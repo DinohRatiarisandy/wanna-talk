@@ -14,7 +14,7 @@ import Logout from "../connexion/Logout";
 import { useAuthStore } from "@/store/useAuthStore";
 import { doc, getDoc, onSnapshot, Timestamp } from "firebase/firestore";
 import { database } from "@/firebase";
-import { UserInfos } from "../models/types";
+import { UserFirebase } from "../models/types";
 import NewChat from "./NewChat";
 
 type ChatListProps = ComponentPropsWithoutRef<"div">;
@@ -22,7 +22,7 @@ export type ChatType = {
    chatId?: string;
    receiverId: string;
    lastMessage: string;
-   user: UserInfos;
+   user: UserFirebase;
    updateAt: Timestamp;
 };
 

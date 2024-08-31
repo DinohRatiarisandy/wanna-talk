@@ -3,7 +3,7 @@ import GmailIcon from "../logos/GmailIcon";
 import { auth, database, provider } from "../../firebase";
 import { useAuthStore } from "@/store/useAuthStore";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { UserInfos } from "../models/types";
+import { UserFirebase } from "../models/types";
 
 export default function Login() {
    const setUser = useAuthStore((state) => state.setUser);
@@ -14,7 +14,7 @@ export default function Login() {
          const result = await signInWithPopup(auth, provider);
          const user = result.user;
 
-         const currentUserData: UserInfos = {
+         const currentUserData: UserFirebase = {
             userID: user.uid,
             userName: user.displayName,
             userEmail: user.email,
