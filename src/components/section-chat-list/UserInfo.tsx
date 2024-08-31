@@ -1,18 +1,20 @@
-import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Avatar } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ComponentPropsWithoutRef } from "react";
 
 type UserInfoProps = ComponentPropsWithoutRef<"div"> & {
-   userProfile: string;
-   userName: string;
+   userProfil: string | undefined | null;
+   userName: string | undefined | null;
 };
 
 export default function UserInfo(props: UserInfoProps) {
    return (
       <div className={`p-1.5 ${props.className}`}>
          <Avatar>
-            <AvatarImage src={props.userProfile} />
-            <AvatarFallback>RDL</AvatarFallback>
+            {typeof props.userProfil === "string" ? (
+               <AvatarImage src={props.userProfil} />
+            ) : (
+               <AvatarFallback>No image</AvatarFallback>
+            )}
          </Avatar>
          <div>
             <h1>{props.userName}</h1>
