@@ -1,7 +1,9 @@
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import GmailIcon from "../logos/GmailIcon";
-import { auth, provider } from "../../firebase";
+import { auth, database, provider } from "../../firebase";
 import { useAuthStore } from "@/store/useAuthStore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { UserInfos } from "../models/types";
 
 export default function Login() {
    const setUser = useAuthStore((state) => state.setUser);
@@ -9,32 +11,32 @@ export default function Login() {
    async function handleGoogleLogin(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
       try {
-         await signInWithPopup(auth, provider)
-            .then((result) => {
-               // This gives you a Google Access Token. You can use it to access the Google API.
-               const credential =
-                  GoogleAuthProvider.credentialFromResult(result);
-               const token = credential?.accessToken;
-               // The signed-in user info.
-               const user = result.user;
-               // IdP data available using getAdditionalUserInfo(result)
-               // ...
-               setUser(user);
-            })
-            .catch((error) => {
-               // Handle Errors here.
-               const errorCode = error.code;
-               const errorMessage = error.message;
-               // The email of the user's account used.
-               const email = error.customData.email;
-               // The AuthCredential type that was used.
-               const credential = GoogleAuthProvider.credentialFromError(error);
-               // ...
-            });
+         const result = await signInWithPopup(auth, provider);
+         const user = result.user;
+
+         const currentUserData: UserInfos = {
+            userID: user.uid,
+            userName: user.displayName,
+            userEmail: user.email,
+            userProfil: user.photoURL,
+         };
+
+         const userDocRef = doc(database, "users", user.uid);
+         const docSnapshot = await getDoc(userDocRef);
+
+         if (docSnapshot.exists()) {
+            await setDoc(userDocRef, currentUserData, { merge: true });
+         } else {
+            await setDoc(userDocRef, currentUserData);
+            const userChatListDocRef = doc(database, "userChatList", user.uid);
+            await setDoc(userChatListDocRef, { chats: [] });
+         }
+         setUser(currentUserData);
       } catch (error) {
-         console.log(error);
+         console.log("Error during Google Login:", error);
       }
    }
+
    return (
       <form
          onSubmit={(e) => handleGoogleLogin(e)}
@@ -46,7 +48,7 @@ export default function Login() {
          >
             <GmailIcon size={56} />
             <p className="text-lg text-primary-foreground">
-               Connect with your gmail
+               Connect with your Gmail
             </p>
          </button>
       </form>
