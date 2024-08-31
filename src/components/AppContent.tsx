@@ -17,7 +17,7 @@ export default function AppContent() {
 
    if (isLoading) return <Loading />;
 
-   return user !== null ? (
+   return user?.userID !== undefined ? (
       <div className={`flex ${theme}`}>
          <ChatList className="flex h-[100vh] flex-[1] flex-col gap-2 border-r border-accent" />
          <ChatDetails className="flex h-[100vh] flex-[2.5] flex-col border-accent lg:border-r" />
