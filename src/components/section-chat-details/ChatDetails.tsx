@@ -1,5 +1,4 @@
 import UserInfo from "../section-chat-list/UserInfo";
-import userProfile from "../../assets/users-profiles/my-profile.jpeg";
 import { ComponentPropsWithoutRef } from "react";
 import { Image, Send } from "lucide-react";
 import { Textarea } from "../ui/textarea";
@@ -14,6 +13,7 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const MESSAGES = [
    {
@@ -108,6 +108,7 @@ const MESSAGES = [
 type ChatDetailsProps = ComponentPropsWithoutRef<"div">;
 
 export default function ChatDetails(props: ChatDetailsProps) {
+   const { user } = useAuthStore();
    return (
       <div className={props.className}>
          {/**
@@ -117,8 +118,8 @@ export default function ChatDetails(props: ChatDetailsProps) {
           */}
          <header className="flex border-b border-accent text-xl">
             <UserInfo
-               userProfile={userProfile}
-               userName="Prisca L."
+               userProfil={user?.userProfil}
+               userName={user?.userName}
                className="flex w-full gap-2"
             />
          </header>

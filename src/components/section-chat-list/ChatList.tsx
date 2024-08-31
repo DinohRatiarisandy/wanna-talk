@@ -1,8 +1,6 @@
-import userProfile from "../../assets/users-profiles/my-profile.jpeg";
-import { Input } from "../ui/input";
-import { Ellipsis, LogOut, Search, UserRoundPen } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import ChatCard from "./ChatCard";
-import { ComponentPropsWithoutRef } from "react";
+import { ComponentPropsWithoutRef, useEffect, useState } from "react";
 import { ToggleTheme } from "../ui/ToggleTheme";
 import {
    DropdownMenuItem,
@@ -10,113 +8,62 @@ import {
    DropdownMenuContent,
    DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipProvider,
-   TooltipTrigger,
-} from "../ui/tooltip";
-import { useThemeStore } from "@/store/useThemeStore";
 
-const CHAT_LIST = [
-   {
-      chatUID: "12en2",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "124arw",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-   {
-      chatUID: "12en4",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "12cv4aw",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-   {
-      chatUID: "12352en",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "23st",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-   {
-      chatUID: "12,.en",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "124araw",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-   {
-      chatUID: "12e/.n",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "12bk4aw",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-   {
-      chatUID: "12][en",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "oe];;",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-   {
-      chatUID: "12en",
-      chatName: "Dinoh S.",
-      chatProfile: userProfile,
-      chatLastMsg:
-         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem, officia sunt qui quae hic maiores fugiat nostrum quaerat autem illo dignissimos corrupti sed quas blanditiis velit eum aliquid enim animi!",
-   },
-   {
-      chatUID: "'124aw",
-      chatName: "Prisca L.",
-      chatProfile: userProfile,
-      chatLastMsg: "Salut ! ❤️",
-   },
-];
+import { useThemeStore } from "@/store/useThemeStore";
+import Logout from "../connexion/Logout";
+import { useAuthStore } from "@/store/useAuthStore";
+import { doc, getDoc, onSnapshot, Timestamp } from "firebase/firestore";
+import { database } from "@/firebase";
+import { UserInfos } from "../models/types";
+import NewChat from "./NewChat";
 
 type ChatListProps = ComponentPropsWithoutRef<"div">;
+export type ChatType = {
+   chatId?: string;
+   receiverId: string;
+   lastMessage: string;
+   user: UserInfos;
+   updateAt: Timestamp;
+};
 
 export default function ChatList(props: ChatListProps) {
    const { theme, toggleTheme } = useThemeStore();
+   const user = useAuthStore((state) => state.user);
+   const [userChatList, setUserChatList] = useState<ChatType[]>([]);
 
+   useEffect(() => {
+      if (user?.userID) {
+         const unsubscribe = onSnapshot(
+            doc(database, "userChatList", user.userID),
+            async (res) => {
+               if (res.exists()) {
+                  const items = res.data().chats;
+
+                  const promises = items.map(async (item: ChatType) => {
+                     const userDocRef = doc(database, "users", item.receiverId);
+                     const userDocSnap = await getDoc(userDocRef);
+
+                     const user = userDocSnap.data();
+                     return { ...item, user };
+                  });
+
+                  const chatData = await Promise.all(promises);
+                  setUserChatList(
+                     chatData.sort((a, b) => b.updateAt - a.updateAt),
+                  );
+               } else {
+                  console.log("No such document!");
+               }
+            },
+            (error) => {
+               console.log("Error fetching user chat list:", error);
+            },
+         );
+
+         return () => unsubscribe();
+      }
+   }, [user?.userID]);
+   console.log(userChatList);
    return (
       <div className={props.className}>
          {/**
@@ -127,16 +74,7 @@ export default function ChatList(props: ChatListProps) {
           **/}
          <header className="mb-3 flex items-center justify-between p-2">
             {/* New message */}
-            <TooltipProvider>
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <UserRoundPen size={24} className="cursor-pointer" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                     <p>New chat</p>
-                  </TooltipContent>
-               </Tooltip>
-            </TooltipProvider>
+            <NewChat />
 
             {/* Logout and toggle mode */}
             <DropdownMenu>
@@ -153,26 +91,17 @@ export default function ChatList(props: ChatListProps) {
                         {theme === "dark" ? "Light mode" : "Dark mode"}
                      </span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex cursor-pointer gap-1">
-                     <LogOut size={18} />
-                     <span>Logout</span>
-                  </DropdownMenuItem>
+                  <Logout />
                </DropdownMenuContent>
             </DropdownMenu>
          </header>
 
          {/**
           *
-          * Search
+          * Label for Discussions
           *
           */}
-         <div className="flex items-center gap-1.5 px-1.5 sm:mt-0">
-            <Search />
-            <Input
-               className="h-6 sm:h-8 lg:h-10"
-               placeholder="Search user..."
-            />
-         </div>
+         <p className="text-center text-xl">Discussions</p>
 
          {/**
           *
@@ -180,8 +109,14 @@ export default function ChatList(props: ChatListProps) {
           *
           **/}
          <main className="overflow-scroll">
-            {CHAT_LIST.map(function (chat) {
-               return <ChatCard key={chat.chatUID} {...chat} />;
+            {userChatList.map(function (chat) {
+               return (
+                  <ChatCard
+                     key={chat.chatId}
+                     lastMessage={chat.lastMessage}
+                     {...chat.user}
+                  />
+               );
             })}
          </main>
       </div>
