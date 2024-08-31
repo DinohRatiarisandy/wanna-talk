@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { User } from "firebase/auth";
+import { UserInfos } from "@/components/models/types";
 
 type AuthState = {
-   user: User | null;
+   user: UserInfos | undefined | null;
    isLoading: boolean;
-   setUser: (user: User | null) => void;
+   setUser: (user: UserInfos | undefined | null) => void;
    setLoading: (loading: boolean) => void;
 };
 
