@@ -63,7 +63,6 @@ export default function ChatList(props: ChatListProps) {
          return () => unsubscribe();
       }
    }, [user?.userID]);
-   console.log(userChatList);
    return (
       <div className={props.className}>
          {/**
