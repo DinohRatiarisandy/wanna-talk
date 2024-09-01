@@ -1,56 +1,28 @@
-import { signInWithPopup } from "firebase/auth";
-import GmailIcon from "../logos/GmailIcon";
-import { auth, database, provider } from "../../firebase";
-import { useAuthStore } from "@/store/useAuthStore";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { UserFirebase } from "../models/types";
+import { useState } from "react";
+import LoginEmailPassword from "./LoginEmailPassword";
+import LoginGoogle from "./LoginGoogle";
+import Register from "./Register";
 
 export default function Login() {
-   const setUser = useAuthStore((state) => state.setUser);
-
-   async function handleGoogleLogin(e: React.FormEvent<HTMLFormElement>) {
-      e.preventDefault();
-      try {
-         const result = await signInWithPopup(auth, provider);
-         const user = result.user;
-
-         const currentUserData: UserFirebase = {
-            userID: user.uid,
-            userName: user.displayName,
-            userEmail: user.email,
-            userProfil: user.photoURL,
-         };
-
-         const userDocRef = doc(database, "users", user.uid);
-         const docSnapshot = await getDoc(userDocRef);
-
-         if (docSnapshot.exists()) {
-            await setDoc(userDocRef, currentUserData, { merge: true });
-         } else {
-            await setDoc(userDocRef, currentUserData);
-            const userChatListDocRef = doc(database, "userChatList", user.uid);
-            await setDoc(userChatListDocRef, { chats: [] });
-         }
-         setUser(currentUserData);
-      } catch (error) {
-         console.log("Error during Google Login:", error);
-      }
-   }
+   const [account, setAccount] = useState(true);
 
    return (
-      <form
-         onSubmit={(e) => handleGoogleLogin(e)}
-         className="flex h-[100vh] w-full items-center justify-center border bg-[#060606]"
-      >
-         <button
-            type="submit"
-            className="flex w-72 cursor-pointer items-center justify-center rounded-full bg-transparent ring-2 transition hover:ring-4"
-         >
-            <GmailIcon size={56} />
-            <p className="text-lg text-primary-foreground">
-               Connect with your Gmail
+      <div className="m-auto flex w-96 flex-col items-center gap-4 border p-4 shadow">
+         {account ? <LoginEmailPassword /> : <Register />}
+         <div className="flex gap-2">
+            <p className="text-muted-foreground">
+               {account
+                  ? "Don't have an account yet ?"
+                  : "Already have an account !"}
             </p>
-         </button>
-      </form>
+            <a
+               onClick={() => setAccount((prev) => !prev)}
+               className="cursor-pointer self-end text-blue-500 underline hover:text-blue-500/60"
+            >
+               {account ? "Register" : "Login"}
+            </a>
+         </div>
+         <LoginGoogle />
+      </div>
    );
 }
