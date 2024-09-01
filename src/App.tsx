@@ -1,11 +1,12 @@
 import AppContent from "./components/AppContent";
-import { AuthProvider } from "./store/AuthProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
    return (
-      <AuthProvider>
+      <>
+         <Toaster />
          <AppContent />
-      </AuthProvider>
+      </>
    );
 }
 
