@@ -16,6 +16,7 @@ import { doc, getDoc, onSnapshot, Timestamp } from "firebase/firestore";
 import { database } from "@/firebase";
 import { UserFirebase } from "../models/types";
 import NewChat from "./NewChat";
+import { useChatStore } from "@/store/useChatStore";
 
 type ChatListProps = ComponentPropsWithoutRef<"div">;
 export type ChatType = {
@@ -23,13 +24,14 @@ export type ChatType = {
    receiverId: string;
    lastMessage: string;
    user: UserFirebase;
-   updateAt: Timestamp;
+   updatedAt: Timestamp;
 };
 
 export default function ChatList(props: ChatListProps) {
+   const [userChatList, setUserChatList] = useState<ChatType[]>([]);
    const { theme, toggleTheme } = useThemeStore();
    const user = useAuthStore((state) => state.user);
-   const [userChatList, setUserChatList] = useState<ChatType[]>([]);
+   const chatId = useChatStore((state) => state.chatId);
 
    useEffect(() => {
       if (user?.userID) {
@@ -49,7 +51,7 @@ export default function ChatList(props: ChatListProps) {
 
                   const chatData = await Promise.all(promises);
                   setUserChatList(
-                     chatData.sort((a, b) => b.updateAt - a.updateAt),
+                     chatData.sort((a, b) => b.updatedAt - a.updatedAt),
                   );
                } else {
                   console.log("No such document!");
@@ -63,6 +65,7 @@ export default function ChatList(props: ChatListProps) {
          return () => unsubscribe();
       }
    }, [user?.userID]);
+
    return (
       <div className={props.className}>
          {/**
@@ -109,9 +112,12 @@ export default function ChatList(props: ChatListProps) {
           **/}
          <main className="overflow-scroll">
             {userChatList.map(function (chat) {
+               const isActive = chat.chatId === chatId;
                return (
                   <ChatCard
+                     className={`${isActive ? "bg-secondary" : ""}`}
                      key={chat.chatId}
+                     chat={chat}
                      lastMessage={chat.lastMessage}
                      {...chat.user}
                   />
