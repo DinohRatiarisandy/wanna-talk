@@ -3,18 +3,30 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
+   arrayUnion,
    collection,
+   doc,
    DocumentData,
+   getDoc,
    getDocs,
    query,
+   serverTimestamp,
+   setDoc,
+   updateDoc,
    where,
 } from "firebase/firestore";
 import { database } from "@/firebase";
 import { useState } from "react";
 import UserInfo from "./UserInfo";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useChatStore } from "@/store/useChatStore";
+import { ChatType } from "./ChatList";
+import { UserFirebase } from "../models/types";
 
 export default function NewChat() {
    const [friends, setFriends] = useState<DocumentData | null>(null);
+   const user = useAuthStore((state) => state.user);
+   const { setChatId, changeChat } = useChatStore();
 
    async function handleSearch(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
@@ -37,6 +49,55 @@ export default function NewChat() {
       }
    }
 
+   async function handleAdd() {
+      if (!user?.userID) return;
+
+      const chatRef = collection(database, "chats");
+      const userChatRef = doc(database, "userChatList", user.userID);
+
+      try {
+         const userChatListSnapshot = await getDoc(userChatRef);
+         const userChats = userChatListSnapshot.data()?.chats || [];
+
+         const chatExists = userChats.some(function (chat: ChatType) {
+            setChatId(chat.chatId);
+            changeChat(chat.chatId, friends as UserFirebase);
+            return chat.receiverId === friends?.userID;
+         });
+
+         // Conversation already exists
+         if (chatExists) return;
+
+         const newChatRef = doc(chatRef);
+         await setDoc(newChatRef, {
+            createdAt: serverTimestamp(),
+            messages: [],
+         });
+
+         // Update the chats of the friends
+         await updateDoc(doc(userChatRef, friends?.userID), {
+            chats: arrayUnion({
+               chatId: newChatRef.id,
+               lastMessage: "",
+               receiverId: user?.userID,
+               updatedAt: Date.now(),
+            }),
+         });
+
+         // Update the chats of the currentUser
+         await updateDoc(doc(userChatRef, user?.userID), {
+            chats: arrayUnion({
+               chatId: newChatRef.id,
+               lastMessage: "",
+               receiverId: friends?.userID,
+               updatedAt: Date.now(),
+            }),
+         });
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
    return (
       <Popover>
          <PopoverTrigger asChild>
@@ -44,7 +105,7 @@ export default function NewChat() {
          </PopoverTrigger>
          <PopoverContent className="ml-2 flex w-80 flex-col gap-4 p-2">
             <form
-               onSubmit={(e) => handleSearch(e)}
+               onSubmit={handleSearch}
                className="flex items-center rounded border p-1"
             >
                <Search size={24} className="text-muted-foreground" />
@@ -55,6 +116,7 @@ export default function NewChat() {
                   className="h-8 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                />
             </form>
+
             {/*
              * Results
              */}
@@ -67,7 +129,9 @@ export default function NewChat() {
                         userProfil={friends?.userProfil}
                         className="flex items-center gap-2"
                      />
-                     <Button variant="outline">Add</Button>
+                     <Button onClick={handleAdd} variant="outline">
+                        Add
+                     </Button>
                   </div>
                )}
             </div>
