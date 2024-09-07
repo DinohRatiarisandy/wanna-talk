@@ -20,7 +20,7 @@ export default function LoginGoogle() {
 
          const currentUserData: UserFirebase = {
             userID: user.uid,
-            userName: user.displayName,
+            userName: user.displayName?.slice(0, 10),
             userEmail: user.email,
             userProfil: user.photoURL,
          };
