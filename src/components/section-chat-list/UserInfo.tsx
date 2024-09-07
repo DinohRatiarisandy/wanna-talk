@@ -11,7 +11,7 @@ export default function UserInfo(props: UserInfoProps) {
       <div className={`p-1.5 ${props.className}`}>
          <Avatar>
             {typeof props.userProfil === "string" ? (
-               <AvatarImage src={props.userProfil} />
+               <AvatarImage className="object-cover" src={props.userProfil} />
             ) : (
                <AvatarFallback>No image</AvatarFallback>
             )}
