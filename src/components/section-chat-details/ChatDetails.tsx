@@ -3,10 +3,6 @@ import { ComponentPropsWithoutRef } from "react";
 import { Image, Send } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import MessageCard from "./MessageCard";
-import chatImg from "../../assets/users-profiles/my-profile.jpeg";
-import profile1 from "../../assets/users-profiles/profile-1.jpg";
-import profile2 from "../../assets/users-profiles/profile-2.jpg";
-import profile3 from "../../assets/users-profiles/profile-3.jpg";
 import {
    Tooltip,
    TooltipContent,
@@ -14,101 +10,71 @@ import {
    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/store/useAuthStore";
-
-const MESSAGES = [
-   {
-      msgID: "12en13",
-      sender: "Lety",
-      content:
-         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
-      sendAt: "today: 12:06",
-   },
-   {
-      msgID: "13ensa",
-      sender: "Dinoh",
-      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "12enars",
-      sender: "Lety",
-      content:
-         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
-      sendAt: "today: 12:06",
-   },
-   {
-      msgID: "13enzx",
-      sender: "Dinoh",
-      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "12enhn",
-      sender: "Lety",
-      content:
-         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
-      sendAt: "today: 12:06",
-   },
-   {
-      msgID: "13en213r",
-      sender: "Dinoh",
-      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "12en567t",
-      sender: "Lety",
-      content:
-         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
-      sendAt: "today: 12:06",
-   },
-   {
-      msgID: "13en12s",
-      sender: "Dinoh",
-      content: "Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam?",
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "12enllu[",
-      sender: "Lety",
-      content:
-         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Omnis ab vel harum cumque quo. Perspiciatis modi quibusdam cupiditate sequi officia libero odit qui dolor soluta molestias, minima tenetur quos nihil?",
-      sendAt: "today: 12:06",
-   },
-   {
-      msgID: "13en][",
-      sender: "Dinoh",
-      isContentImg: true,
-      content: chatImg,
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "13e.n",
-      sender: "Lety",
-      isContentImg: true,
-      content: profile1,
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "13en/.",
-      sender: "Lety",
-      isContentImg: true,
-      content: profile2,
-      sendAt: "today: 12:09",
-   },
-   {
-      msgID: "13easn/.",
-      sender: "Dinoh",
-      isContentImg: true,
-      content: profile3,
-      sendAt: "today: 12:09",
-   },
-];
+import { useChatStore } from "@/store/useChatStore";
+import {
+   arrayUnion,
+   doc,
+   DocumentData,
+   getDoc,
+   updateDoc,
+} from "firebase/firestore";
+import { database } from "@/firebase";
 
 type ChatDetailsProps = ComponentPropsWithoutRef<"div">;
 
 export default function ChatDetails(props: ChatDetailsProps) {
    const { user } = useAuthStore();
+   const { messages, chatId, user: friend } = useChatStore();
+
+   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const messageArea = form.elements.namedItem(
+         "message-area",
+      ) as HTMLInputElement;
+
+      if (!messageArea.value.trim()) return;
+      if (!chatId || !user?.userID || !friend?.userID) return;
+
+      const messageText = messageArea.value;
+      messageArea.value = "";
+
+      try {
+         await updateDoc(doc(database, "chats", chatId), {
+            messages: arrayUnion({
+               senderId: user.userID,
+               text: messageText,
+               sendAt: new Date(),
+            }),
+         });
+
+         messageArea.value = "";
+         const users = [user.userID, friend.userID];
+
+         users.forEach(async (id: string) => {
+            const userChatsRef = doc(database, "userChatList", id);
+            const userChatsSnapshot = await getDoc(userChatsRef);
+            if (userChatsSnapshot.exists()) {
+               const userChatsData = userChatsSnapshot.data();
+
+               const chatIndex = userChatsData.chats.findIndex(
+                  (c: DocumentData) => c.chatId === chatId,
+               );
+               userChatsData.chats[chatIndex].lastMessage = messageText;
+               userChatsData.chats[chatIndex].isSeen =
+                  id === user.userID ? true : false;
+               userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+               await updateDoc(userChatsRef, {
+                  chats: userChatsData.chats,
+               });
+            }
+         });
+      } catch (error) {
+         console.log(error);
+      }
+   }
+
    return (
       <div className={props.className}>
          {/**
@@ -118,8 +84,8 @@ export default function ChatDetails(props: ChatDetailsProps) {
           */}
          <header className="flex border-b border-accent text-xl">
             <UserInfo
-               userProfil={user?.userProfil}
-               userName={user?.userName}
+               userProfil={friend?.userProfil}
+               userName={friend?.userName}
                className="flex w-full gap-2"
             />
          </header>
@@ -130,15 +96,21 @@ export default function ChatDetails(props: ChatDetailsProps) {
           *
           */}
          <main className="flex flex-1 flex-col gap-4 overflow-scroll p-2">
-            {MESSAGES.map(function (msg) {
-               return (
-                  <MessageCard
-                     key={msg.msgID}
-                     variant={msg.sender === "Dinoh" ? "own" : "friend"}
-                     {...msg}
-                  />
-               );
-            })}
+            {messages &&
+               messages.messages.map(function (msg: DocumentData) {
+                  return (
+                     <MessageCard
+                        text={msg.text}
+                        senderId={msg.senderId}
+                        sendAt={new Date()}
+                        key={msg.sendAt}
+                        variant={
+                           msg.senderId === user?.userID ? "own" : "friend"
+                        }
+                        {...msg}
+                     />
+                  );
+               })}
          </main>
 
          {/**
@@ -146,7 +118,7 @@ export default function ChatDetails(props: ChatDetailsProps) {
           * Input for sending message
           *
           */}
-         <form className="flex items-end gap-2 p-2">
+         <form onSubmit={handleSubmit} className="flex items-end gap-2 p-2">
             <TooltipProvider>
                <Tooltip>
                   <TooltipTrigger>
@@ -158,7 +130,7 @@ export default function ChatDetails(props: ChatDetailsProps) {
                </Tooltip>
             </TooltipProvider>
 
-            <Textarea placeholder="Tap your message..." />
+            <Textarea id="message-area" placeholder="Tap your message..." />
 
             <TooltipProvider>
                <Tooltip>
