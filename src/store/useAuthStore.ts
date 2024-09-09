@@ -5,31 +5,28 @@ import { database } from "@/firebase";
 
 type AuthState = {
    user: UserFirebase | undefined | null;
-   isLoading: boolean;
+   loading: boolean;
    setUser: (user: UserFirebase | undefined | null) => void;
    fetchUserInfo: (uid: string) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
    user: null,
-   isLoading: true,
-   setUser: (user) => set({ user, isLoading: false }),
+   loading: true,
+   setUser: (user) => set({ user, loading: false }),
    fetchUserInfo: async (uid: string) => {
-      if (!uid) {
-         set({ user: null, isLoading: false });
-         return;
-      }
+      if (!uid) return;
       try {
          const docRef = doc(database, "users", uid);
          const docSnap = await getDoc(docRef);
 
          if (docSnap.exists()) {
-            set({ user: docSnap.data() as UserFirebase, isLoading: false });
+            set({ user: docSnap.data() as UserFirebase, loading: false });
          } else {
-            set({ user: null, isLoading: false });
+            set({ user: null, loading: false });
          }
       } catch (error) {
-         set({ user: null, isLoading: false });
+         set({ user: null, loading: false });
       }
    },
 }));
