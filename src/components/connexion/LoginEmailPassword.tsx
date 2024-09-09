@@ -8,10 +8,22 @@ import { auth, database } from "@/firebase";
 import { UserFirebase } from "../models/types";
 import { doc, getDoc } from "firebase/firestore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { FirebaseError } from "firebase/app";
 
-export default function LoginEmailPassword() {
+export type LoginProps = {
+   loading: boolean;
+   setLoading: (l: boolean) => void;
+};
+
+export default function LoginEmailPassword({
+   loading,
+   setLoading,
+}: LoginProps) {
    const { toast } = useToast();
    const setUser = useAuthStore((state) => state.setUser);
+   const [spinner, setSpinner] = useState(false);
 
    async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
@@ -25,6 +37,17 @@ export default function LoginEmailPassword() {
          const password = form.elements.namedItem(
             "user-password",
          ) as HTMLInputElement;
+
+         if (!email.value || !password.value) {
+            toast({
+               variant: "destructive",
+               description: "Please, fill all inputs !",
+            });
+            return;
+         }
+
+         setLoading(true);
+         setSpinner(true);
 
          // Sign in
          const result = await signInWithEmailAndPassword(
@@ -40,16 +63,43 @@ export default function LoginEmailPassword() {
 
          if (docSnapshot.exists()) {
             setUser(docSnapshot.data() as UserFirebase);
+            setLoading(false);
+            setSpinner(false);
             toast({
                description: "Login Successfuly !",
             });
          }
       } catch (error) {
-         toast({
-            title: "User not found !",
-            variant: "destructive",
-            description: "Email or Password invalid.",
-         });
+         if (error instanceof FirebaseError) {
+            console.log(error.code);
+            switch (error.code) {
+               case "auth/network-request-failed":
+                  toast({
+                     description: "Check your network !",
+                     variant: "destructive",
+                  });
+                  break;
+               case "auth/invalid-credential":
+                  toast({
+                     description: "email or password invalid !",
+                     variant: "destructive",
+                  });
+                  break;
+               case "auth/too-many-requests":
+                  toast({
+                     description:
+                        "Access to this account has been temporarily disabled due to many failed login attempts. Try again later !",
+                  });
+                  break;
+               default:
+                  toast({
+                     description: `${error.message}`,
+                     variant: "destructive",
+                  });
+            }
+         }
+         setLoading(false);
+         setSpinner(false);
       }
    }
 
@@ -65,8 +115,13 @@ export default function LoginEmailPassword() {
                <label htmlFor="user-password">Password:</label>
                <Input id="user-password" type="password" />
             </div>
-            <Button type="submit" variant="default" className="text-lg">
-               Sign In
+            <Button
+               type="submit"
+               variant="default"
+               className="text-lg"
+               disabled={loading}
+            >
+               {spinner && <Loader2 className="mx-1 animate-spin" />} Sign In
             </Button>
          </form>
       </div>

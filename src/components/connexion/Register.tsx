@@ -9,16 +9,20 @@ import { UserFirebase } from "../models/types";
 import defaultAvatar from "../../assets/users-profiles/default-avatar.png";
 import uploadImage from "@/lib/upload-image";
 import { useAuthStore } from "@/store/useAuthStore";
+import { LoginProps } from "./LoginEmailPassword";
+import { Loader2 } from "lucide-react";
+import { FirebaseError } from "firebase/app";
 
 type AvatarType = {
    file?: File;
    photoUrl: string;
 };
 
-export default function Register() {
+export default function Register({ loading, setLoading }: LoginProps) {
    const [avatar, setAvatar] = useState<AvatarType>();
    const { toast } = useToast();
    const setUser = useAuthStore((state) => state.setUser);
+   const [spinner, setSpinner] = useState(false);
 
    function handleAvatar(e: React.ChangeEvent<HTMLInputElement>) {
       const file = e.target.files?.[0];
@@ -43,6 +47,17 @@ export default function Register() {
       const password = form.elements.namedItem(
          "new-password",
       ) as HTMLInputElement;
+
+      if (!email.value || !username.value || !password.value) {
+         toast({
+            variant: "destructive",
+            description: "Please, fill all inputs !",
+         });
+         return;
+      }
+
+      setLoading(true);
+      setSpinner(true);
 
       try {
          const res = await createUserWithEmailAndPassword(
@@ -78,15 +93,37 @@ export default function Register() {
             chats: [],
          });
 
-         setUser(newUser);
          toast({
             title: "Account created !",
             description: `Welcome ! ${username.value}`,
          });
+
+         setUser(newUser);
+         setLoading(false);
+         setSpinner(false);
       } catch (error) {
-         toast({
-            description: `${error}`,
-         });
+         if (error instanceof FirebaseError) {
+            switch (error.code) {
+               case "auth/email-already-in-use":
+                  toast({
+                     description: "This email is already taken !",
+                     variant: "destructive",
+                  });
+                  break;
+               case "auth/network-request-failed":
+                  toast({
+                     description: "Check your network !",
+                  });
+                  break;
+               default:
+                  toast({
+                     description: `${error.message}`,
+                     variant: "destructive",
+                  });
+            }
+         }
+         setLoading(false);
+         setSpinner(false);
       }
    }
 
@@ -125,8 +162,13 @@ export default function Register() {
                   onChange={(e) => handleAvatar(e)}
                />
             </div>
-            <Button variant="default" className="text-lg" type="submit">
-               Sign Up
+            <Button
+               disabled={loading}
+               variant="default"
+               className="text-lg"
+               type="submit"
+            >
+               {spinner && <Loader2 className="mx-1 animate-spin" />} Sign Up
             </Button>
          </form>
       </div>
