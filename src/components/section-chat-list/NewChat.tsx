@@ -22,11 +22,13 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
 import { ChatType } from "./ChatList";
 import { UserFirebase } from "../models/types";
+import { usePanelStore } from "@/store/usePanelStore";
 
 export default function NewChat() {
    const [friends, setFriends] = useState<DocumentData | null>(null);
    const user = useAuthStore((state) => state.user);
    const { setChatId, changeChat } = useChatStore();
+   const { setLeftPanel } = usePanelStore();
 
    async function handleSearch(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
@@ -50,49 +52,62 @@ export default function NewChat() {
    }
 
    async function handleAdd() {
-      if (!user?.userID) return;
+      if (!user?.userID || !friends?.userID) return;
+
+      setLeftPanel(false);
 
       const chatRef = collection(database, "chats");
       const userChatRef = doc(database, "userChatList", user.userID);
+      const friendChatRef = doc(database, "userChatList", friends.userID); // Référence pour l'ami
 
       try {
+         // 1. Vérifier si la conversation existe déjà dans les chats de l'utilisateur
          const userChatListSnapshot = await getDoc(userChatRef);
          const userChats = userChatListSnapshot.data()?.chats || [];
 
-         const chatExists = userChats.some(function (chat: ChatType) {
-            setChatId(chat.chatId);
-            changeChat(chat.chatId, friends as UserFirebase);
-            return chat.receiverId === friends?.userID;
+         const existingChat = userChats.find((chat: ChatType) => {
+            return chat.receiverId === friends.userID;
          });
 
-         // Conversation already exists
-         if (chatExists) return;
+         if (existingChat) {
+            // Conversation existe déjà, on récupère son chatId
+            setChatId(existingChat.chatId);
+            changeChat(existingChat.chatId, friends as UserFirebase);
+            return; // Sortie car la conversation existe déjà
+         }
 
-         const newChatRef = doc(chatRef);
+         // 2. Créer une nouvelle conversation si elle n'existe pas
+         const newChatRef = doc(chatRef); // Créer un nouveau document pour le chat
+         const newChatId = newChatRef.id; // Récupérer le nouvel ID
+
          await setDoc(newChatRef, {
             createdAt: serverTimestamp(),
             messages: [],
          });
 
-         // Update the chats of the friends
-         await updateDoc(doc(userChatRef, friends?.userID), {
+         // 3. Mettre à jour les chats de l'ami
+         await updateDoc(friendChatRef, {
             chats: arrayUnion({
-               chatId: newChatRef.id,
+               chatId: newChatId,
                lastMessage: "",
-               receiverId: user?.userID,
+               receiverId: user.userID,
                updatedAt: Date.now(),
             }),
          });
 
-         // Update the chats of the currentUser
-         await updateDoc(doc(userChatRef, user?.userID), {
+         // 4. Mettre à jour les chats de l'utilisateur actuel
+         await updateDoc(userChatRef, {
             chats: arrayUnion({
-               chatId: newChatRef.id,
+               chatId: newChatId,
                lastMessage: "",
-               receiverId: friends?.userID,
+               receiverId: friends.userID,
                updatedAt: Date.now(),
             }),
          });
+
+         // 5. Une fois la conversation créée, mettre à jour le chatId et changer la conversation
+         setChatId(newChatId);
+         changeChat(newChatId, friends as UserFirebase);
       } catch (error) {
          console.log(error);
       }

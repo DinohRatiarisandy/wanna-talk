@@ -1,6 +1,6 @@
 import UserInfo from "../section-chat-list/UserInfo";
 import { ComponentPropsWithoutRef } from "react";
-import { Image, Send } from "lucide-react";
+import { Album, Image, List, Send } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import MessageCard from "./MessageCard";
 import {
@@ -19,12 +19,14 @@ import {
    updateDoc,
 } from "firebase/firestore";
 import { database } from "@/firebase";
+import { usePanelStore } from "@/store/usePanelStore";
 
 type ChatDetailsProps = ComponentPropsWithoutRef<"div">;
 
 export default function ChatDetails(props: ChatDetailsProps) {
    const { user } = useAuthStore();
    const { messages, chatId, user: friend } = useChatStore();
+   const { rightPanel, setLeftPanel, setRightPanel } = usePanelStore();
 
    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
       e.preventDefault();
@@ -82,11 +84,19 @@ export default function ChatDetails(props: ChatDetailsProps) {
           * Header: Show with who the user chat
           *
           */}
-         <header className="flex border-b border-accent text-xl">
+         <header className="flex items-center border-b border-accent text-xl">
+            <List
+               onClick={() => setLeftPanel(true)}
+               className="mx-2 cursor-pointer md:hidden"
+            />
             <UserInfo
                userProfil={friend?.userProfil}
                userName={friend?.userName}
-               className="flex w-full gap-2"
+               className="flex w-full items-center gap-2 max-md:justify-center"
+            />
+            <Album
+               onClick={() => setRightPanel(!rightPanel)}
+               className="mx-2 cursor-pointer"
             />
          </header>
 

@@ -2,7 +2,9 @@ import { ComponentPropsWithoutRef } from "react";
 import profile1 from "../../assets/users-profiles/profile-1.jpg";
 import profile2 from "../../assets/users-profiles/profile-2.jpg";
 import profile3 from "../../assets/users-profiles/profile-3.jpg";
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
+import { Button } from "../ui/button";
+import { usePanelStore } from "@/store/usePanelStore";
 
 const SHARED_IMAGES = [
    {
@@ -58,10 +60,21 @@ const SHARED_IMAGES = [
 type ChatMediaProps = ComponentPropsWithoutRef<"div">;
 
 export default function ChatMedia({ className }: ChatMediaProps) {
+   const { setRightPanel } = usePanelStore();
+
    return (
       <div className={className}>
-         <header className="w-full p-3 text-center text-lg font-semibold">
-            Shared Media
+         <header className="relative flex w-full items-center justify-center p-3 text-lg font-semibold">
+            <Button
+               variant="outline"
+               className="absolute left-2 h-8 w-8 p-0 md:hidden"
+            >
+               <X
+                  onClick={() => setRightPanel(false)}
+                  className="cursor-pointer"
+               />
+            </Button>
+            <p className="flex-end">Shared Media</p>
          </header>
          <main className="flex flex-wrap justify-center gap-2 overflow-scroll p-2">
             {SHARED_IMAGES.map(function (img) {

@@ -2,6 +2,7 @@ import { UserFirebase } from "../models/types";
 import UserInfo from "./UserInfo";
 import { useChatStore } from "@/store/useChatStore";
 import { ChatType } from "./ChatList";
+import { usePanelStore } from "@/store/usePanelStore";
 
 type ChatCardProps = UserFirebase & {
    chat: ChatType;
@@ -11,9 +12,11 @@ type ChatCardProps = UserFirebase & {
 
 export default function ChatCard({ className, ...props }: ChatCardProps) {
    const { changeChat } = useChatStore();
+   const { setLeftPanel } = usePanelStore();
 
    async function handleSelect(chat: ChatType) {
       changeChat(chat.chatId, chat.user);
+      setLeftPanel(false);
    }
 
    return (

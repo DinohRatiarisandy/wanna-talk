@@ -1,4 +1,4 @@
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, X } from "lucide-react";
 import ChatCard from "./ChatCard";
 import { ComponentPropsWithoutRef, useEffect, useState } from "react";
 import { ToggleTheme } from "../ui/ToggleTheme";
@@ -17,6 +17,8 @@ import { database } from "@/firebase";
 import { UserFirebase } from "../models/types";
 import NewChat from "./NewChat";
 import { useChatStore } from "@/store/useChatStore";
+import { Button } from "../ui/button";
+import { usePanelStore } from "@/store/usePanelStore";
 
 type ChatListProps = ComponentPropsWithoutRef<"div">;
 export type ChatType = {
@@ -30,6 +32,7 @@ export type ChatType = {
 export default function ChatList(props: ChatListProps) {
    const [userChatList, setUserChatList] = useState<ChatType[]>([]);
    const { theme, toggleTheme } = useThemeStore();
+   const { leftPanel, setLeftPanel } = usePanelStore();
    const user = useAuthStore((state) => state.user);
    const chatId = useChatStore((state) => state.chatId);
 
@@ -79,23 +82,34 @@ export default function ChatList(props: ChatListProps) {
             <NewChat />
 
             {/* Logout and toggle mode */}
-            <DropdownMenu>
-               <DropdownMenuTrigger asChild>
-                  <Ellipsis className="cursor-pointer" />
-               </DropdownMenuTrigger>
-               <DropdownMenuContent className="w-42 z-40 rounded">
-                  <DropdownMenuItem
-                     onClick={toggleTheme}
-                     className="flex cursor-pointer gap-1"
-                  >
-                     <ToggleTheme size={18} />
-                     <span>
-                        {theme === "dark" ? "Light mode" : "Dark mode"}
-                     </span>
-                  </DropdownMenuItem>
-                  <Logout />
-               </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex gap-2">
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                     <Ellipsis className="cursor-pointer" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-42 z-40 rounded">
+                     <DropdownMenuItem
+                        onClick={toggleTheme}
+                        className="flex cursor-pointer gap-1"
+                     >
+                        <ToggleTheme size={18} />
+                        <span>
+                           {theme === "dark" ? "Light mode" : "Dark mode"}
+                        </span>
+                     </DropdownMenuItem>
+                     <Logout />
+                  </DropdownMenuContent>
+               </DropdownMenu>
+
+               {leftPanel && !chatId && (
+                  <Button variant="outline" className="h-full p-0 md:hidden">
+                     <X
+                        onClick={() => setLeftPanel(false)}
+                        className="cursor-pointer"
+                     />
+                  </Button>
+               )}
+            </div>
          </header>
 
          {/**
