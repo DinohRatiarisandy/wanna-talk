@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Download } from "lucide-react";
-import { ComponentPropsWithoutRef } from "react";
+import { ComponentPropsWithoutRef, useEffect, useRef } from "react";
 
 type MessageVariant = "own" | "friend";
 
@@ -13,12 +13,18 @@ type MessageCardProps = ComponentPropsWithoutRef<"div"> & {
 };
 
 export default function MessageCard({
-   className,
    variant = "own",
    ...props
 }: MessageCardProps) {
+   const ref = useRef<HTMLDivElement>(null);
+
+   useEffect(() => {
+      ref.current?.scrollIntoView({ behavior: "smooth" });
+   }, [props.text, props.image]);
+
    return (
       <div
+         ref={ref}
          className={clsx(
             {
                "self-end rounded-b rounded-l bg-primary p-1 text-primary-foreground":
@@ -26,8 +32,7 @@ export default function MessageCard({
                "self-start rounded-b rounded-r bg-secondary p-1 text-secondary-foreground":
                   variant === "friend",
             },
-            `${props.image ? "w-[50%] bg-transparent" : ""} sm:max-w-full lg:max-w-[75%]`,
-            className,
+            `${props.image ? "w-[50%] bg-transparent" : ""} max-w-[70%] md:max-w-[65%]`,
          )}
       >
          {props.image ? (
