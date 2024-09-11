@@ -1,16 +1,11 @@
-import UserInfo from "../section-chat-list/UserInfo";
 import { ComponentPropsWithoutRef } from "react";
+
 import { Album, Image, List, Send } from "lucide-react";
-import { Textarea } from "../ui/textarea";
-import MessageCard from "./MessageCard";
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipProvider,
-   TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+import { database } from "@/firebase";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
+import { usePanelStore } from "@/store/usePanelStore";
 import {
    arrayUnion,
    doc,
@@ -18,8 +13,16 @@ import {
    getDoc,
    updateDoc,
 } from "firebase/firestore";
-import { database } from "@/firebase";
-import { usePanelStore } from "@/store/usePanelStore";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import MessageCard from "./MessageCard";
+import { Textarea } from "../ui/textarea";
+import UserInfo from "../section-chat-list/UserInfo";
 
 type ChatDetailsProps = ComponentPropsWithoutRef<"div">;
 
