@@ -1,6 +1,7 @@
+import { ComponentPropsWithoutRef, useEffect, useRef } from "react";
+
 import clsx from "clsx";
 import { Download } from "lucide-react";
-import { ComponentPropsWithoutRef, useEffect, useRef } from "react";
 
 type MessageVariant = "own" | "friend";
 
