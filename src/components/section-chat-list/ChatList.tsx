@@ -1,24 +1,26 @@
-import { Ellipsis, X } from "lucide-react";
-import ChatCard from "./ChatCard";
 import { ComponentPropsWithoutRef, useEffect, useState } from "react";
+
+import { Ellipsis, X } from "lucide-react";
+
+import { database } from "@/firebase";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useChatStore } from "@/store/useChatStore";
+import { useThemeStore } from "@/store/useThemeStore";
+import { usePanelStore } from "@/store/usePanelStore";
+import { doc, getDoc, onSnapshot, Timestamp } from "firebase/firestore";
+
+import NewChat from "./NewChat";
+import ChatCard from "./ChatCard";
+import { Button } from "../ui/button";
+import Logout from "../connexion/Logout";
+import { UserFirebase } from "../models/types";
 import { ToggleTheme } from "../ui/ToggleTheme";
 import {
-   DropdownMenuItem,
    DropdownMenu,
    DropdownMenuContent,
+   DropdownMenuItem,
    DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-
-import { useThemeStore } from "@/store/useThemeStore";
-import Logout from "../connexion/Logout";
-import { useAuthStore } from "@/store/useAuthStore";
-import { doc, getDoc, onSnapshot, Timestamp } from "firebase/firestore";
-import { database } from "@/firebase";
-import { UserFirebase } from "../models/types";
-import NewChat from "./NewChat";
-import { useChatStore } from "@/store/useChatStore";
-import { Button } from "../ui/button";
-import { usePanelStore } from "@/store/usePanelStore";
 
 type ChatListProps = ComponentPropsWithoutRef<"div">;
 export type ChatType = {
@@ -27,6 +29,7 @@ export type ChatType = {
    lastMessage: string;
    user: UserFirebase;
    updatedAt: Timestamp;
+   isSeen: boolean;
 };
 
 export default function ChatList(props: ChatListProps) {
