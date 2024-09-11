@@ -58,10 +58,9 @@ export default function NewChat() {
 
       const chatRef = collection(database, "chats");
       const userChatRef = doc(database, "userChatList", user.userID);
-      const friendChatRef = doc(database, "userChatList", friends.userID); // Référence pour l'ami
+      const friendChatRef = doc(database, "userChatList", friends.userID);
 
       try {
-         // 1. Vérifier si la conversation existe déjà dans les chats de l'utilisateur
          const userChatListSnapshot = await getDoc(userChatRef);
          const userChats = userChatListSnapshot.data()?.chats || [];
 
@@ -70,22 +69,19 @@ export default function NewChat() {
          });
 
          if (existingChat) {
-            // Conversation existe déjà, on récupère son chatId
             setChatId(existingChat.chatId);
             changeChat(existingChat.chatId, friends as UserFirebase);
-            return; // Sortie car la conversation existe déjà
+            return;
          }
 
-         // 2. Créer une nouvelle conversation si elle n'existe pas
-         const newChatRef = doc(chatRef); // Créer un nouveau document pour le chat
-         const newChatId = newChatRef.id; // Récupérer le nouvel ID
+         const newChatRef = doc(chatRef);
+         const newChatId = newChatRef.id;
 
          await setDoc(newChatRef, {
             createdAt: serverTimestamp(),
             messages: [],
          });
 
-         // 3. Mettre à jour les chats de l'ami
          await updateDoc(friendChatRef, {
             chats: arrayUnion({
                chatId: newChatId,
@@ -95,7 +91,6 @@ export default function NewChat() {
             }),
          });
 
-         // 4. Mettre à jour les chats de l'utilisateur actuel
          await updateDoc(userChatRef, {
             chats: arrayUnion({
                chatId: newChatId,
@@ -105,7 +100,6 @@ export default function NewChat() {
             }),
          });
 
-         // 5. Une fois la conversation créée, mettre à jour le chatId et changer la conversation
          setChatId(newChatId);
          changeChat(newChatId, friends as UserFirebase);
       } catch (error) {
