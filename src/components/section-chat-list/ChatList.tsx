@@ -130,12 +130,14 @@ export default function ChatList(props: ChatListProps) {
          <main className="overflow-scroll">
             {userChatList.map(function (chat) {
                const isActive = chat.chatId === chatId;
+               if (chat.lastMessage === "") return;
                return (
                   <ChatCard
                      className={`${isActive ? "bg-secondary" : ""}`}
                      key={chat.chatId}
                      chat={chat}
                      lastMessage={chat.lastMessage}
+                     userChatList={userChatList}
                      {...chat.user}
                   />
                );

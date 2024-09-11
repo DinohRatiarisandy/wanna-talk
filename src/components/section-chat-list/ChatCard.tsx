@@ -4,42 +4,53 @@ import { useChatStore } from "@/store/useChatStore";
 import { ChatType } from "./ChatList";
 import { usePanelStore } from "@/store/usePanelStore";
 import { database } from "@/firebase";
-import { doc, DocumentData, getDoc, updateDoc } from "firebase/firestore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { doc, updateDoc } from "firebase/firestore";
 
 type ChatCardProps = UserFirebase & {
    chat: ChatType;
    lastMessage: string;
    className: string;
+   userChatList: ChatType[];
 };
 
-export default function ChatCard({ className, ...props }: ChatCardProps) {
-   const { chatId, changeChat } = useChatStore();
+export default function ChatCard({
+   className,
+   userChatList,
+   ...props
+}: ChatCardProps) {
+   const { changeChat } = useChatStore();
    const { setLeftPanel } = usePanelStore();
    const { user } = useAuthStore();
 
    async function handleSelect(chat: ChatType) {
       if (!user?.userID) return;
 
-      const userChatsRef = doc(database, "userChatList", user?.userID);
-      const userChatsSnapshot = await getDoc(userChatsRef);
-      if (userChatsSnapshot.exists()) {
-         const userChatsData = userChatsSnapshot.data();
-
-         const chatIndex = userChatsData.chats.findIndex(
-            (c: DocumentData) => c.chatId === chatId,
-         );
-         userChatsData.chats[chatIndex].isSeen = true;
-
-         await updateDoc(userChatsRef, {
-            chats: userChatsData.chats,
+      if (!chat.isSeen) {
+         const userChats = userChatList.map((item) => {
+            const { user, ...rest } = item;
+            return rest;
          });
+         const chatIndex = userChats.findIndex(
+            (item) => item.chatId === chat.chatId,
+         );
+         userChatList[chatIndex].isSeen = true;
+
+         const userChatsRef = doc(database, "userChatList", user?.userID);
+
+         try {
+            await updateDoc(userChatsRef, {
+               chats: userChatList,
+            });
+         } catch (error) {
+            console.log(error);
+         }
       }
 
       changeChat(chat.chatId, chat.user);
       setLeftPanel(false);
    }
-   console.log(props.chat.isSeen);
+
    return (
       <div
          onClick={() => handleSelect(props.chat)}
